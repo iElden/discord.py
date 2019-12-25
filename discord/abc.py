@@ -770,7 +770,7 @@ class Messageable(metaclass=abc.ABCMeta):
     async def _get_channel(self):
         raise NotImplementedError
 
-    async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
+    async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None, escape_everyone=True):
         """|coro|
 
         Sends a message to the destination with the content given.
@@ -806,6 +806,8 @@ class Messageable(metaclass=abc.ABCMeta):
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
             then it is silently ignored.
+        escape_everyone: :class:`bool`
+            If True, escape @everyone and @here
 
         Raises
         --------
@@ -826,6 +828,8 @@ class Messageable(metaclass=abc.ABCMeta):
         channel = await self._get_channel()
         state = self._state
         content = str(content) if content is not None else None
+        if escape_everyone and content is not None:
+            content = content.replace('@everyone', '@\u200beveryone').replace('@here', '@\u200bhere')
         if embed is not None:
             embed = embed.to_dict()
 
